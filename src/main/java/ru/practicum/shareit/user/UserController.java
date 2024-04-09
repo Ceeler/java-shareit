@@ -19,6 +19,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UserDto getUser(@PathVariable Integer id) {

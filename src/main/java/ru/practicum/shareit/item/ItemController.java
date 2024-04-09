@@ -18,8 +18,9 @@ import java.util.List;
 @Slf4j
 @AllArgsConstructor
 public class ItemController {
-    
+
     private final ItemService itemService;
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ItemDto getItem(@PathVariable Integer id) {
