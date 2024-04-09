@@ -2,13 +2,13 @@ package ru.practicum.shareit.common;
 
 import java.util.List;
 
-public interface BaseMapper<T, TDto> {
+public interface BaseMapper<T, V> {
 
-    TDto toDto(T model);
+    V toDto(T model);
 
-    T toModel(TDto dto);
+    T toModel(V dto);
 
-    List<TDto> toDtoList(List<T> tList);
+    List<V> toDtoList(List<T> tList);
 
-    void updateModelFromDto(T model, TDto dto);
+    void updateModelFromDto(T model, V dto);
 }
