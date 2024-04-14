@@ -1,34 +1,31 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.model.NotFoundException;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.request.UserCreateRequest;
+import ru.practicum.shareit.user.dto.request.UserUpdateRequest;
+import ru.practicum.shareit.user.dto.response.UserResponse;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
     private final UserDao userDao;
-    private final UserMapper userMapper;
+    private final UserMapperImpl userMapper;
 
-    public UserService(@Qualifier("UserMemoryDao") UserDao dao,
-                       UserMapper userMapper) {
-        this.userDao = dao;
-        this.userMapper = userMapper;
-    }
-
-    public UserDto getUser(Integer id) {
+    public UserResponse getUser(Integer id) {
         User user = userDao.get(id).orElseThrow(() -> new NotFoundException("User not found"));
         return userMapper.toDto(user);
     }
 
-    public List<UserDto> getAll() {
+    public List<UserResponse> getAll() {
         return userMapper.toDtoList(userDao.getAll());
     }
 
-    public UserDto saveUser(UserDto userDto) {
+    public UserResponse saveUser(UserCreateRequest userDto) {
         User newUser = userMapper.toModel(userDto);
         if (!isEmailFree(newUser.getEmail())) {
             throw new RuntimeException("Email already exists");
@@ -37,15 +34,11 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
-    public UserDto updateUser(Integer id, UserDto userDto) {
-        User user = userDao.get(id).orElseThrow(() -> new NotFoundException("User not found"));
-
-        if (userDto.getEmail() != null && (!userDto.getEmail().equals(user.getEmail())) &&
-                !isEmailFree(userDto.getEmail())) {
-            throw new RuntimeException("Email already exists");
-        }
-        userMapper.updateModelFromDto(user, userDto);
-        return userMapper.toDto(userDao.update(user));
+    public UserResponse updateUser(Integer id, UserUpdateRequest userDto) {
+        User oldUser = userDao.get(id).orElseThrow(() -> new NotFoundException("User not found"));
+        User newUser = new User(oldUser);
+        userMapper.updateModelFromDto(newUser, userDto);
+        return userMapper.toDto(userDao.update(newUser));
     }
 
     public void deleteUser(Integer id) {

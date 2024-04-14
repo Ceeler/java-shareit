@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.user.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,14 +12,13 @@ import javax.validation.constraints.NotBlank;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
-
-    private Integer id;
+public class UserCreateRequest {
 
     @NotBlank
     private String name;
 
-    @Email @NotBlank
+    @Email
+    @NotBlank
     private String email;
-}
 
+}

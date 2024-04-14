@@ -4,14 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.request.UserCreateRequest;
+import ru.practicum.shareit.user.dto.request.UserUpdateRequest;
+import ru.practicum.shareit.user.dto.response.UserResponse;
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping(path = "/users")
 @Slf4j
@@ -22,36 +21,36 @@ public class UserController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto getUser(@PathVariable Integer id) {
+    public UserResponse getUser(@PathVariable Integer id) {
       log.info("Пришел запрос GET /users/{}", id);
-      UserDto userDto = userService.getUser(id);
+      UserResponse userDto = userService.getUser(id);
       log.info("Отправлен ответ GET /users/{}: {}",id, userDto);
       return userDto;
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> getAllUser() {
+    public List<UserResponse> getAllUser() {
         log.info("Пришел запрос GET /users");
-        List<UserDto> userDtoList = userService.getAll();
+        List<UserResponse> userDtoList = userService.getAll();
         log.info("Отправлен ответ GET /users: {}", userDtoList);
         return userDtoList;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto saveUser(@RequestBody @Valid UserDto userDto) {
+    public UserResponse saveUser(@RequestBody @Valid UserCreateRequest userDto) {
         log.info("Пришел запрос POST /users: {}", userDto);
-        UserDto newUserDto = userService.saveUser(userDto);
+        UserResponse newUserDto = userService.saveUser(userDto);
         log.info("Отправлен ответ POST /users: {}", newUserDto);
         return newUserDto;
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto updateUser(@PathVariable Integer id, @RequestBody UserDto userDto) {
+    public UserResponse updateUser(@PathVariable Integer id, @RequestBody UserUpdateRequest userDto) {
         log.info("Пришел запрос PATCH /users/{}", id);
-        UserDto newUserDto = userService.updateUser(id, userDto);
+        UserResponse newUserDto = userService.updateUser(id, userDto);
         log.info("Отправлен ответ PATCH /users/{}: {}",id, newUserDto);
         return newUserDto;
     }
