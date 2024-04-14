@@ -1,10 +1,12 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.model.NotAuthorizedException;
 import ru.practicum.shareit.exception.model.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.request.ItemCreateRequest;
+import ru.practicum.shareit.item.dto.request.ItemUpdateRequest;
+import ru.practicum.shareit.item.dto.response.ItemResponse;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserDao;
 
@@ -12,31 +14,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class ItemService {
-    private final ItemDao itemDao;
-    private final ItemMapper itemMapper;
+
+    private final ItemDaoImpl itemDao;
 
     private final UserDao userDao;
 
-    public ItemService(@Qualifier("ItemMemoryDao") ItemDao dao,
-                       ItemMapper itemMapper,
-                       UserDao userDao) {
-        this.itemDao = dao;
-        this.itemMapper = itemMapper;
-        this.userDao = userDao;
-    }
+    private final ItemMapper itemMapper;
 
-    public ItemDto getItem(Integer id) {
+    public ItemResponse getItem(Integer id) {
         Item item = itemDao.get(id).orElseThrow(() -> new NotFoundException("Item not found"));
         return itemMapper.toDto(item);
     }
 
-    public List<ItemDto> getAll(Integer userId) {
+    public List<ItemResponse> getAll(Integer userId) {
         getUser(userId);
         return itemMapper.toDtoList(itemDao.findAllByUser(userId));
     }
 
-    public ItemDto saveItem(ItemDto itemDto, Integer userId) {
+    public ItemResponse saveItem(ItemCreateRequest itemDto, Integer userId) {
         Item newItem = itemMapper.toModel(itemDto);
         User user = getUser(userId);
         newItem.setOwner(user);
@@ -44,7 +41,7 @@ public class ItemService {
         return itemMapper.toDto(item);
     }
 
-    public ItemDto updateItem(Integer id, ItemDto itemDto, Integer userId) {
+    public ItemResponse updateItem(Integer id, ItemUpdateRequest itemDto, Integer userId) {
         Item item = itemDao.get(id).orElseThrow(() -> new NotFoundException("Item not found"));
 
         if (!item.getOwner().getId().equals(userId)) {
@@ -65,7 +62,7 @@ public class ItemService {
         itemDao.delete(id);
     }
 
-    public List<ItemDto> findByText(String text) {
+    public List<ItemResponse> findByText(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
