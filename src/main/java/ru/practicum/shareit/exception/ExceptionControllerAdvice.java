@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import ru.practicum.shareit.exception.model.ExceptionMessage;
 import ru.practicum.shareit.exception.model.NotAuthenticatedException;
 import ru.practicum.shareit.exception.model.NotAuthorizedException;
@@ -41,7 +40,7 @@ public class ExceptionControllerAdvice {
     }
 
     @ExceptionHandler({NotAuthorizedException.class})
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionMessage onNotAuthorizedException(NotAuthorizedException e) {
         log.warn("403 {}", e.getMessage());
         return new ExceptionMessage(e.getMessage());
@@ -51,6 +50,13 @@ public class ExceptionControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionMessage onNotAuthenticatedException(NotAuthenticatedException e) {
         log.warn("500 {}", e.getMessage());
+        return new ExceptionMessage(e.getMessage());
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionMessage onIllegalArgumentException(final Throwable e) {
+        log.warn("400 {}", e.getMessage());
         return new ExceptionMessage(e.getMessage());
     }
 

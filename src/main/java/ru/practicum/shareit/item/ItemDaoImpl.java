@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository("ItemMemoryDao")
+@Deprecated
 public class ItemDaoImpl implements ItemDao {
 
     private final Map<Integer, Item> items = new HashMap<>();

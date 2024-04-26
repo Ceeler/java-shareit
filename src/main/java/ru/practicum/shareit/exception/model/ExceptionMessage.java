@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class ExceptionMessage {
 
-    private String message;
+    private String error;
 
 }

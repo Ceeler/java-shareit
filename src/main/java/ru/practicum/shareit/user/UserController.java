@@ -48,7 +48,7 @@ public class UserController {
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserResponse updateUser(@PathVariable Integer id, @RequestBody UserUpdateRequest userDto) {
+    public UserResponse updateUser(@PathVariable Integer id, @RequestBody @Valid UserUpdateRequest userDto) {
         log.info("Пришел запрос PATCH /users/{}", id);
         UserResponse newUserDto = userService.updateUser(id, userDto);
         log.info("Отправлен ответ PATCH /users/{}: {}",id, newUserDto);

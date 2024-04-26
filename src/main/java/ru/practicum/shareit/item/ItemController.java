@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.comment.dto.request.CommentRequest;
+import ru.practicum.shareit.comment.dto.response.CommentResponse;
 import ru.practicum.shareit.exception.model.NotAuthenticatedException;
 import ru.practicum.shareit.item.dto.request.ItemCreateRequest;
 import ru.practicum.shareit.item.dto.request.ItemUpdateRequest;
+import ru.practicum.shareit.item.dto.response.ItemGetResponse;
 import ru.practicum.shareit.item.dto.response.ItemResponse;
 
 import javax.validation.Valid;
@@ -22,21 +25,21 @@ public class ItemController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemResponse getItem(@PathVariable Integer id) {
-        log.info("Пришел запрос GET /items/{}", id);
-        ItemResponse itemDto = itemService.getItem(id);
+    public ItemGetResponse getItem(@PathVariable Integer id, @RequestHeader("X-Sharer-User-Id") Integer userId) {
+        log.info("Пришел запрос GET /items/{} userId={}", id, userId);
+        ItemGetResponse itemDto = itemService.getItem(id, userId);
         log.info("Отправлен ответ GET /items/{}: {}",id, itemDto);
         return itemDto;
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponse> getAllItem(@RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public List<ItemGetResponse> getAllItem(@RequestHeader("X-Sharer-User-Id") Integer userId) {
         log.info("Пришел запрос GET /items userId={}", userId);
         if (userId == null) {
             throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
         }
-        List<ItemResponse> itemDtoList = itemService.getAll(userId);
+        List<ItemGetResponse> itemDtoList = itemService.getAll(userId);
         log.info("Отправлен ответ GET /items: {}", itemDtoList);
         return itemDtoList;
     }
@@ -57,7 +60,7 @@ public class ItemController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ItemResponse updateItem(@PathVariable Integer id,
-                                   @RequestBody ItemUpdateRequest itemDto,
+                                   @RequestBody @Valid ItemUpdateRequest itemDto,
                                    @RequestHeader("X-Sharer-User-Id") Integer userId) {
         log.info("Пришел запрос PATCH /items/{} userId={}", id, userId);
         if (userId == null) {
@@ -86,5 +89,17 @@ public class ItemController {
         List<ItemResponse> itemDtoList = itemService.findByText(text);
         log.info("Отправлен ответ GET /items/search: {}", itemDtoList);
         return itemDtoList;
+    }
+
+    @PostMapping("/{id}/comment")
+    @ResponseStatus(HttpStatus.OK)
+    public CommentResponse addComment(
+            @RequestBody @Valid CommentRequest commentRequest,
+            @PathVariable Integer id,
+            @RequestHeader("X-Sharer-User-Id") Integer userId) {
+        log.info("Пришел запрос POST /items/{}/comment userId={}", id, userId);
+        CommentResponse response = itemService.addComment(commentRequest, id, userId);
+        log.info("Отправлен ответ POST /items/{}/comment userId={} :{}", id, userId, response);
+        return response;
     }
 }
