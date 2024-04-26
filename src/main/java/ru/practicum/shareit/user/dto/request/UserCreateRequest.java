@@ -1,25 +1,24 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class UserCreateRequest {
 
-    private Integer id;
-
+    @NotBlank
     private String name;
 
+    @Email
+    @NotBlank
     private String email;
 
-    public User(User user) {
-        this.id = user.getId();
-        this.name = user.getName();
-        this.email = user.getEmail();
-    }
 }
