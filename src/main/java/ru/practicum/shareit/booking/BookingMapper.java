@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.dto.response.BookingResponse;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 
 public class BookingMapper {
@@ -13,11 +14,12 @@ public class BookingMapper {
     private BookingMapper() {
     }
 
-    public static Booking toModel(BookingCreateRequest dto) {
+    public static Booking toModel(BookingCreateRequest dto, User booker, Item item) {
         return Booking.builder()
                 .start(dto.getStart())
                 .end(dto.getEnd())
-                .item(Item.builder().id(dto.getItemId()).build())
+                .booker(booker)
+                .item(item)
                 .status(Status.WAITING)
                 .build();
     }

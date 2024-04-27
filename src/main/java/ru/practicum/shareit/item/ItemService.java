@@ -58,9 +58,8 @@ public class ItemService {
     }
 
     public ItemResponse saveItem(ItemCreateRequest itemDto, Integer userId) {
-        Item newItem = ItemMapper.toModel(itemDto);
         User user = getUser(userId);
-        newItem.setOwner(user);
+        Item newItem = ItemMapper.toModel(itemDto, user);
         Item item = itemRepository.save(newItem);
         return ItemMapper.toDto(item);
     }
@@ -136,9 +135,7 @@ public class ItemService {
         if (bookingRepository.countByBookerIdAndItemId(userId, itemId, LocalDateTime.now()) < 1) {
             throw new IllegalArgumentException("You have to rent item, before comment");
         }
-        Comment comment = CommentMapper.toModel(dto);
-        comment.setAuthor(user);
-        comment.setItem(item);
+        Comment comment = CommentMapper.toModel(dto, user, item);
         commentRepository.save(comment);
         return CommentMapper.toDto(comment);
     }

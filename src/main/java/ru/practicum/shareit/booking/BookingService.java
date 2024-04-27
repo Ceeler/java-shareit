@@ -44,10 +44,7 @@ public class BookingService {
         if (item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("You can't book your item");
         }
-        Booking booking = BookingMapper.toModel(dto);
-        log.info("item {}, user {}, booking {}", item, user, booking);
-        booking.setBooker(user);
-        booking.setItem(item);
+        Booking booking = BookingMapper.toModel(dto, user, item);
         return BookingMapper.toDto(bookingRepository.save(booking));
     }
 

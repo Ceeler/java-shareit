@@ -64,7 +64,6 @@ public class BookingController {
         }
 
         if (approved == null) {
-            log.info("MY REQUEST PARAM CHECK");
             throw new IllegalArgumentException("Approved must be specified");
         }
 
@@ -77,7 +76,7 @@ public class BookingController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponse> getUserBookings(
-            @RequestParam(required = false, value = "state") String stateStr,
+            @RequestParam(defaultValue = "ALL", value = "state") String stateStr,
             @RequestHeader("X-Sharer-User-Id") Integer userId
     ) {
         log.info("Пришел запрос GET /bookings?state={} userId={}", stateStr, userId);
@@ -86,11 +85,7 @@ public class BookingController {
         }
         State state;
         try {
-            if (stateStr == null) {
-                state = State.ALL;
-            } else {
-                state = State.valueOf(stateStr.toUpperCase());
-            }
+            state = State.valueOf(stateStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: " + stateStr);
         }
@@ -102,7 +97,7 @@ public class BookingController {
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponse> getUserItemsBookings(
-            @RequestParam(required = false, value = "state") String stateStr,
+            @RequestParam(defaultValue = "ALL", value = "state") String stateStr,
             @RequestHeader("X-Sharer-User-Id") Integer userId
     ) {
         log.info("Пришел запрос GET /bookings/owner?state={} userId={}", stateStr, userId);
@@ -111,11 +106,7 @@ public class BookingController {
         }
         State state;
         try {
-            if (stateStr == null) {
-                state = State.ALL;
-            } else {
-                state = State.valueOf(stateStr.toUpperCase());
-            }
+            state = State.valueOf(stateStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown state: " + stateStr);
         }

@@ -26,9 +26,6 @@ public class UserService {
 
     public UserResponse saveUser(UserCreateRequest userDto) {
         User newUser = UserMapper.toModel(userDto);
-//        if (!isEmailFree(newUser.getEmail())) {
-//            throw new RuntimeException("Email already exists");
-//        }
         User user = userRepository.save(newUser);
         return UserMapper.toDto(user);
     }

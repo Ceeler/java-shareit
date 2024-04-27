@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.dto.request.ItemCreateRequest;
 import ru.practicum.shareit.item.dto.request.ItemUpdateRequest;
 import ru.practicum.shareit.item.dto.response.ItemGetResponse;
 import ru.practicum.shareit.item.dto.response.ItemResponse;
+import ru.practicum.shareit.user.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,10 +16,11 @@ import java.util.stream.Collectors;
 public class ItemMapper {
 
 
-    public static Item toModel(ItemCreateRequest dto) {
+    public static Item toModel(ItemCreateRequest dto, User owner) {
         return Item.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
+                .owner(owner)
                 .available(dto.getAvailable())
                 .build();
     }
