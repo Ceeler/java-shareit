@@ -6,6 +6,7 @@ import ru.practicum.shareit.exception.model.DaoException;
 import java.util.*;
 
 @Repository("UserMemoryDao")
+@Deprecated
 public class UserDaoImpl implements UserDao {
 
     private final Map<Integer, User> users = new HashMap<>();

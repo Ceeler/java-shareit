@@ -13,40 +13,31 @@ import java.util.List;
 @AllArgsConstructor
 public class UserService {
 
-    private final UserDao userDao;
-    private final UserMapperImpl userMapper;
+    private final UserRepository userRepository;
 
     public UserResponse getUser(Integer id) {
-        User user = userDao.get(id).orElseThrow(() -> new NotFoundException("User not found"));
-        return userMapper.toDto(user);
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        return UserMapper.toDto(user);
     }
 
     public List<UserResponse> getAll() {
-        return userMapper.toDtoList(userDao.getAll());
+        return UserMapper.toDtoList(userRepository.findAll());
     }
 
     public UserResponse saveUser(UserCreateRequest userDto) {
-        User newUser = userMapper.toModel(userDto);
-        if (!isEmailFree(newUser.getEmail())) {
-            throw new RuntimeException("Email already exists");
-        }
-        User user = userDao.save(newUser);
-        return userMapper.toDto(user);
+        User newUser = UserMapper.toModel(userDto);
+        User user = userRepository.save(newUser);
+        return UserMapper.toDto(user);
     }
 
     public UserResponse updateUser(Integer id, UserUpdateRequest userDto) {
-        User oldUser = userDao.get(id).orElseThrow(() -> new NotFoundException("User not found"));
-        User newUser = new User(oldUser);
-        userMapper.updateModelFromDto(newUser, userDto);
-        return userMapper.toDto(userDao.update(newUser));
+        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        UserMapper.updateModelFromDto(user, userDto);
+        return UserMapper.toDto(userRepository.save(user));
     }
 
     public void deleteUser(Integer id) {
-        userDao.get(id).orElseThrow(() -> new NotFoundException("User not found"));
-        userDao.delete(id);
-    }
-
-    private boolean isEmailFree(String email) {
-        return userDao.findByEmail(email).isEmpty();
+        userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        userRepository.deleteById(id);
     }
 }

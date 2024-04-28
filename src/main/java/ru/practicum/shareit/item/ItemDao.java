@@ -4,6 +4,7 @@ import ru.practicum.shareit.common.BaseDao;
 
 import java.util.List;
 
+@Deprecated
 public interface ItemDao extends BaseDao<Item, Integer> {
 
     List<Item> findAllByUser(Integer userId);
