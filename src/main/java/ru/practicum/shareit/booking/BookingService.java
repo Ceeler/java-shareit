@@ -3,6 +3,9 @@ package ru.practicum.shareit.booking;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.request.BookingCreateRequest;
 import ru.practicum.shareit.booking.dto.response.BookingResponse;
@@ -75,21 +78,27 @@ public class BookingService {
         return BookingMapper.toDto(booking);
     }
 
-    public List<BookingResponse> getUserBookings(Integer userId, State state) {
+    public List<BookingResponse> getUserBookings(Integer userId, State state, Integer from, Integer size) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         BooleanExpression expression = QBooking.booking.booker.id.eq(userId);
         expression = addStateFilterPredicate(expression, state);
-        Iterable<Booking> bookings = bookingRepository.findAll(expression, QBooking.booking.start.desc());
+
+        Pageable page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"));
+        Iterable<Booking> bookings = bookingRepository.findAll(expression, page);
+
         return StreamSupport.stream(bookings.spliterator(), false)
                 .map(BookingMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public List<BookingResponse> getUserItemsBookings(Integer userId, State state) {
+    public List<BookingResponse> getUserItemsBookings(Integer userId, State state, Integer from, Integer size) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        BooleanExpression expression = QBooking.booking.item.owner.id.eq(userId);
+        BooleanExpression expression = QBooking.booking.item.owner.id.eq(userId).and(QBooking.booking.id.goe(from));
         expression = addStateFilterPredicate(expression, state);
-        Iterable<Booking> bookings = bookingRepository.findAll(expression, QBooking.booking.start.desc());
+
+        Pageable page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"));
+        Iterable<Booking> bookings = bookingRepository.findAll(expression, page);
+
         return StreamSupport.stream(bookings.spliterator(), false)
                 .map(BookingMapper::toDto)
                 .collect(Collectors.toList());
