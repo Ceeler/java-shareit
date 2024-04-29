@@ -3,11 +3,13 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.comment.CommentMapper;
+import ru.practicum.shareit.item.dto.ItemForItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemNameDto;
 import ru.practicum.shareit.item.dto.request.ItemCreateRequest;
 import ru.practicum.shareit.item.dto.request.ItemUpdateRequest;
 import ru.practicum.shareit.item.dto.response.ItemGetResponse;
 import ru.practicum.shareit.item.dto.response.ItemResponse;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import java.util.List;
@@ -16,12 +18,13 @@ import java.util.stream.Collectors;
 public class ItemMapper {
 
 
-    public static Item toModel(ItemCreateRequest dto, User owner) {
+    public static Item toModel(ItemCreateRequest dto, User owner, ItemRequest request) {
         return Item.builder()
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .owner(owner)
                 .available(dto.getAvailable())
+                .request(request)
                 .build();
     }
 
@@ -37,6 +40,7 @@ public class ItemMapper {
                 .name(model.getName())
                 .description(model.getDescription())
                 .available(model.getAvailable())
+                .requestId(model.getRequest() != null ? model.getRequest().getId() : null)
                 .build();
     }
 
@@ -71,6 +75,20 @@ public class ItemMapper {
 
     public static ItemNameDto toItemNameDto(Item model) {
         return new ItemNameDto(model.getId(), model.getName());
+    }
+
+    public static ItemForItemRequestDto toItemForItemRequestDto(Item item) {
+        return ItemForItemRequestDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .requestId(item.getRequest().getId())
+                .build();
+    }
+
+    public static List<ItemForItemRequestDto> toItemForItemRequestDtoList(List<Item> items) {
+        return items.stream().map(ItemMapper::toItemForItemRequestDto).collect(Collectors.toList());
     }
 
 }

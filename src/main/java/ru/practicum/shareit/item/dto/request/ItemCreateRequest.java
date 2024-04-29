@@ -23,4 +23,6 @@ public class ItemCreateRequest {
     @NotNull
     private Boolean available;
 
+    private Integer requestId;
+
 }
