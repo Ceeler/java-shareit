@@ -37,7 +37,7 @@ public class ItemController {
     public List<ItemGetResponse> getAllItem(
             @RequestParam(value = "from", defaultValue = "0") Integer from,
             @RequestParam(name = "size", defaultValue = "20") Integer size,
-            @RequestHeader("X-Sharer-User-Id") Integer userId) {
+            @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос GET /items userId={}", userId);
         if (from < 0 || size < 1) {
             throw new IllegalArgumentException("Page must be from>0 and size>1");
@@ -53,7 +53,7 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemResponse saveItem(@RequestBody @Valid ItemCreateRequest itemDto,
-                                 @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                 @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос POST /items userId{}: {}", userId, itemDto);
         if (userId == null) {
             throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
@@ -67,7 +67,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.OK)
     public ItemResponse updateItem(@PathVariable Integer id,
                                    @RequestBody @Valid ItemUpdateRequest itemDto,
-                                   @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                   @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос PATCH /items/{} userId={}", id, userId);
         if (userId == null) {
             throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
@@ -79,7 +79,8 @@ public class ItemController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteItem(@PathVariable Integer id, @RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public void deleteItem(@PathVariable Integer id,
+                           @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос DELETE /items/{} userId={}", id, userId);
         if (userId == null) {
             throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
@@ -90,7 +91,7 @@ public class ItemController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemResponse> getItem(@RequestParam String text,
+    public List<ItemResponse> searchItem(@RequestParam String text,
                                       @RequestParam(value = "from", defaultValue = "0") Integer from,
                                       @RequestParam(name = "size", defaultValue = "20") Integer size) {
         log.info("Пришел запрос GET /items/search?text={}", text);
@@ -107,8 +108,11 @@ public class ItemController {
     public CommentResponse addComment(
             @RequestBody @Valid CommentRequest commentRequest,
             @PathVariable Integer id,
-            @RequestHeader("X-Sharer-User-Id") Integer userId) {
+            @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос POST /items/{}/comment userId={}", id, userId);
+        if (userId == null) {
+            throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
+        }
         CommentResponse response = itemService.addComment(commentRequest, id, userId);
         log.info("Отправлен ответ POST /items/{}/comment userId={} :{}", id, userId, response);
         return response;

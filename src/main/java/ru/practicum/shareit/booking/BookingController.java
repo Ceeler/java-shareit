@@ -24,7 +24,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public BookingResponse getBook(
             @PathVariable Integer id,
-            @RequestHeader("X-Sharer-User-Id") Integer userId) {
+            @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос GET /bookings/{} userId={}", id, userId);
         if (userId == null) {
             throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
@@ -38,7 +38,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.CREATED)
     public BookingResponse bookItem(
             @RequestBody @Valid BookingCreateRequest bookingDto,
-            @RequestHeader("X-Sharer-User-Id") Integer userId) {
+            @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос POST /bookings userId={}: {}", userId, bookingDto);
 
         if (userId == null) {
@@ -54,8 +54,8 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public BookingResponse approveBook(
             @PathVariable Integer id,
-            @RequestParam Boolean approved,
-            @RequestHeader("X-Sharer-User-Id") Integer userId
+            @RequestParam(required = false) Boolean approved,
+            @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId
     ) {
         log.info("Пришел запрос PATCH /bookings/{}?approved={} userId={}", id, approved, userId);
 
@@ -77,7 +77,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponse> getUserBookings(
             @RequestParam(defaultValue = "ALL", value = "state") String stateStr,
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId,
             @RequestParam(value = "from", defaultValue = "0") Integer from,
             @RequestParam(name = "size", defaultValue = "20") Integer size
     ) {
@@ -103,7 +103,7 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public List<BookingResponse> getUserItemsBookings(
             @RequestParam(defaultValue = "ALL", value = "state") String stateStr,
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId,
             @RequestParam(value = "from", defaultValue = "0") Integer from,
             @RequestParam(name = "size", defaultValue = "20") Integer size
     ) {

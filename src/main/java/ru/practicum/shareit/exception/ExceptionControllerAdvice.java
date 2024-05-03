@@ -2,6 +2,7 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -10,8 +11,6 @@ import ru.practicum.shareit.exception.model.NotAuthenticatedException;
 import ru.practicum.shareit.exception.model.NotAuthorizedException;
 import ru.practicum.shareit.exception.model.NotFoundException;
 
-import javax.validation.ConstraintViolationException;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,17 +18,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ExceptionControllerAdvice {
 
-    @ExceptionHandler({ConstraintViolationException.class})
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ExceptionMessage> onConstraintException(ConstraintViolationException e) {
-        log.warn("Ошибка валидации", e);
-        if (e.getConstraintViolations() != null) {
-            List<ExceptionMessage> response = e.getConstraintViolations().stream()
-                    .map(v -> new ExceptionMessage(v.getMessage()))
-                    .collect(Collectors.toList());
-            return response;
-        }
-        return Collections.singletonList(new ExceptionMessage(e.getMessage()));
+    public List<ExceptionMessage> onMethodArgumentNotValidException(
+            MethodArgumentNotValidException e
+    ) {
+        final List<ExceptionMessage> response = e.getBindingResult().getFieldErrors().stream()
+                .map(error -> new ExceptionMessage(error.getField() + ": " + error.getDefaultMessage()))
+                .collect(Collectors.toList());
+        return response;
     }
 
     @ExceptionHandler({NotFoundException.class})

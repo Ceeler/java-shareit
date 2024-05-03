@@ -22,8 +22,11 @@ public class ItemRequestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemRequestDto addRequest(@Valid @RequestBody ItemRequestRequest itemRequestRequest,
-                                     @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                     @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос POST /requests userId={}", userId);
+        if (userId == null) {
+            throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
+        }
         ItemRequestDto response = itemRequestService.addItemRequest(itemRequestRequest, userId);
         log.info("Отправлен ответ POST /requests userId={} :{}", userId, response);
         return response;
@@ -31,7 +34,7 @@ public class ItemRequestController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemRequestDto> getOwnRequests(@RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public List<ItemRequestDto> getOwnRequests(@RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос GET /requests userId={}", userId);
         if (userId == null) {
             throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
@@ -44,11 +47,14 @@ public class ItemRequestController {
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public List<ItemRequestDto> getAllRequests(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId,
             @RequestParam(value = "from", defaultValue = "0") Integer from,
             @RequestParam(name = "size", defaultValue = "20") Integer size
     ) {
         log.info("Пришел запрос GET /requests/all?from={}&size={}", from, size);
+        if (userId == null) {
+            throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
+        }
         if (from < 0 || size < 1) {
             throw new IllegalArgumentException("Page must be from>0 and size>1");
         }
@@ -60,8 +66,11 @@ public class ItemRequestController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ItemRequestDto getRequest(@PathVariable Integer id,
-                                     @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                     @RequestHeader(name = "X-Sharer-User-Id", required = false) Integer userId) {
         log.info("Пришел запрос GET /requests/{} userId={}", id, userId);
+        if (userId == null) {
+            throw new NotAuthenticatedException("Header X-Sharer-User-Id requested");
+        }
         ItemRequestDto response = itemRequestService.getItemRequest(id, userId);
         log.info("Отправлен ответ GET /requests/{} userId={} : {}", id, userId, response);
         return response;

@@ -10,8 +10,8 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     @Query(value = "SELECT i FROM Item i WHERE " +
-            "LOWER(i.name) LIKE LOWER(CONCAT('%', :text, '%')) OR " +
-            "LOWER(i.description) LIKE LOWER(CONCAT('%', :text, '%')) AND " +
+            "(LOWER(i.name) LIKE LOWER(CONCAT('%', :text, '%')) OR " +
+            "LOWER(i.description) LIKE LOWER(CONCAT('%', :text, '%'))) AND " +
             "i.available IS TRUE ")
     Page<Item> findAllByDescriptionOrNameContainsIgnoreCase(String text, Pageable page);
 

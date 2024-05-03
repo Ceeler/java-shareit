@@ -14,13 +14,13 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class ItemCreateRequest {
 
-    @NotBlank
+    @NotBlank(message = "Name can't be blank")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "Description can't be blank")
     private String description;
 
-    @NotNull
+    @NotNull(message = "You must specify availability")
     private Boolean available;
 
     private Integer requestId;

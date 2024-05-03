@@ -41,7 +41,6 @@ public class ItemService {
 
     private final ItemRequestRepository itemRequestRepository;
 
-
     public ItemGetResponse getItem(Integer id, Integer userId) {
         Item item = itemRepository.getItemByIdWithOwner(id).orElseThrow(() -> new NotFoundException("Item not found"));
         if (userId != null) {
@@ -70,7 +69,7 @@ public class ItemService {
         ItemRequest request = null;
         if (itemDto.getRequestId() != null) {
             request = itemRequestRepository.findById(itemDto.getRequestId())
-                    .orElseThrow(() -> new NotFoundException("Request nit  found"));
+                    .orElseThrow(() -> new NotFoundException("Request not found"));
         }
         Item newItem = ItemMapper.toModel(itemDto, user, request);
         Item item = itemRepository.save(newItem);

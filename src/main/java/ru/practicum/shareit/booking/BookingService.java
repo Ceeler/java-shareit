@@ -37,15 +37,15 @@ public class BookingService {
 
     public BookingResponse bookItem(Integer userId, BookingCreateRequest dto) {
         Item item = itemRepository.findById(dto.getItemId()).orElseThrow(() -> new NotFoundException("Item not found"));
+        if (item.getOwner().getId().equals(userId)) {
+            throw new NotFoundException("You can't book your item");
+        }
         if (!item.getAvailable()) {
             throw new IllegalArgumentException("Item not available");
         }
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         if (!isItemFree(dto.getItemId(), dto.getStart(), dto.getEnd())) {
-            throw new IllegalArgumentException("Already booked for this  time");
-        }
-        if (item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("You can't book your item");
+            throw new IllegalArgumentException("Already booked for this time");
         }
         Booking booking = BookingMapper.toModel(dto, user, item);
         return BookingMapper.toDto(bookingRepository.save(booking));
@@ -93,7 +93,7 @@ public class BookingService {
 
     public List<BookingResponse> getUserItemsBookings(Integer userId, State state, Integer from, Integer size) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
-        BooleanExpression expression = QBooking.booking.item.owner.id.eq(userId).and(QBooking.booking.id.goe(from));
+        BooleanExpression expression = QBooking.booking.item.owner.id.eq(userId);
         expression = addStateFilterPredicate(expression, state);
 
         Pageable page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"));
