@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -15,6 +18,8 @@ import ru.practicum.shareit.item.dto.request.ItemCreateRequest;
 import ru.practicum.shareit.item.dto.request.ItemUpdateRequest;
 import ru.practicum.shareit.item.dto.response.ItemGetResponse;
 import ru.practicum.shareit.item.dto.response.ItemResponse;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -34,6 +39,7 @@ public class ItemService {
 
     private final CommentRepository commentRepository;
 
+    private final ItemRequestRepository itemRequestRepository;
 
     public ItemGetResponse getItem(Integer id, Integer userId) {
         Item item = itemRepository.getItemByIdWithOwner(id).orElseThrow(() -> new NotFoundException("Item not found"));
@@ -46,9 +52,10 @@ public class ItemService {
         return ItemMapper.toItemGetDto(item, null, null);
     }
 
-    public List<ItemGetResponse> getAll(Integer userId) {
+    public List<ItemGetResponse> getAll(Integer userId, Integer from, Integer size) {
         getUser(userId);
-        List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId);
+        Pageable page = PageRequest.of(from / size, size);
+        List<Item> items = itemRepository.findAllByOwnerIdOrderById(userId, page).getContent();
         List<ItemGetResponse> response = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         for (Item item : items) {
@@ -59,7 +66,12 @@ public class ItemService {
 
     public ItemResponse saveItem(ItemCreateRequest itemDto, Integer userId) {
         User user = getUser(userId);
-        Item newItem = ItemMapper.toModel(itemDto, user);
+        ItemRequest request = null;
+        if (itemDto.getRequestId() != null) {
+            request = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException("Request not found"));
+        }
+        Item newItem = ItemMapper.toModel(itemDto, user, request);
         Item item = itemRepository.save(newItem);
         return ItemMapper.toDto(item);
     }
@@ -85,12 +97,13 @@ public class ItemService {
         itemRepository.deleteById(id);
     }
 
-    public List<ItemResponse> findByText(String text) {
+    public List<ItemResponse> findByText(String text, Integer from, Integer size) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-
-        return ItemMapper.toDtoList(itemRepository.findAllByDescriptionOrNameContainsIgnoreCase(text.trim()));
+        Pageable page = PageRequest.of(from / size, size);
+        Page<Item> items = itemRepository.findAllByDescriptionOrNameContainsIgnoreCase(text.trim(), page);
+        return ItemMapper.toDtoList(items.getContent());
     }
 
     private User getUser(Integer userId) {

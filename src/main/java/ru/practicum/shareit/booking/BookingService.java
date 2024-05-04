@@ -3,6 +3,9 @@ package ru.practicum.shareit.booking;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.request.BookingCreateRequest;
 import ru.practicum.shareit.booking.dto.response.BookingResponse;
@@ -34,15 +37,15 @@ public class BookingService {
 
     public BookingResponse bookItem(Integer userId, BookingCreateRequest dto) {
         Item item = itemRepository.findById(dto.getItemId()).orElseThrow(() -> new NotFoundException("Item not found"));
+        if (item.getOwner().getId().equals(userId)) {
+            throw new NotFoundException("You can't book your item");
+        }
         if (!item.getAvailable()) {
             throw new IllegalArgumentException("Item not available");
         }
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         if (!isItemFree(dto.getItemId(), dto.getStart(), dto.getEnd())) {
-            throw new IllegalArgumentException("Already booked for this  time");
-        }
-        if (item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("You can't book your item");
+            throw new IllegalArgumentException("Already booked for this time");
         }
         Booking booking = BookingMapper.toModel(dto, user, item);
         return BookingMapper.toDto(bookingRepository.save(booking));
@@ -75,21 +78,27 @@ public class BookingService {
         return BookingMapper.toDto(booking);
     }
 
-    public List<BookingResponse> getUserBookings(Integer userId, State state) {
+    public List<BookingResponse> getUserBookings(Integer userId, State state, Integer from, Integer size) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         BooleanExpression expression = QBooking.booking.booker.id.eq(userId);
         expression = addStateFilterPredicate(expression, state);
-        Iterable<Booking> bookings = bookingRepository.findAll(expression, QBooking.booking.start.desc());
+
+        Pageable page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"));
+        Iterable<Booking> bookings = bookingRepository.findAll(expression, page);
+
         return StreamSupport.stream(bookings.spliterator(), false)
                 .map(BookingMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public List<BookingResponse> getUserItemsBookings(Integer userId, State state) {
+    public List<BookingResponse> getUserItemsBookings(Integer userId, State state, Integer from, Integer size) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         BooleanExpression expression = QBooking.booking.item.owner.id.eq(userId);
         expression = addStateFilterPredicate(expression, state);
-        Iterable<Booking> bookings = bookingRepository.findAll(expression, QBooking.booking.start.desc());
+
+        Pageable page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "start"));
+        Iterable<Booking> bookings = bookingRepository.findAll(expression, page);
+
         return StreamSupport.stream(bookings.spliterator(), false)
                 .map(BookingMapper::toDto)
                 .collect(Collectors.toList());

@@ -36,9 +36,10 @@ public class Item {
     @EqualsAndHashCode.Exclude
     private User owner;
 
-    @Transient
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
     private ItemRequest request;
 
     @OneToMany(mappedBy = "item")
